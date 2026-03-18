@@ -5,6 +5,8 @@ model AvailabilitySlot {
   startTime      DateTime
   endTime        DateTime
   isBooked       Boolean      @default(false)
+  totalBookings  Int          @default(0)
+  maxCapacity    Int          @default(50)
   tutorProfile   TutorProfile @relation("TutorAvailability", fields: [tutorProfileId], references: [id])
   bookings       Booking[]    @relation("SlotBookings")
 }
