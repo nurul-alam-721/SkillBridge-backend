@@ -19,7 +19,7 @@ const createBooking = async (
     }
 
     const capacity = slot.maxCapacity ?? MAX_CAPACITY;
-    const booked   = slot.totalBookings ?? 0;
+    const booked = slot.totalBookings ?? 0;
 
     if (booked >= capacity) {
       throw new ApiError(httpStatus.CONFLICT, "This slot is fully booked");
@@ -37,8 +37,7 @@ const createBooking = async (
       throw new ApiError(httpStatus.CONFLICT, "You have already booked this slot");
     }
 
-    // Create booking
-    const booking = await tx.booking.create({
+    await tx.booking.create({
       data: {
         studentId,
         tutorProfileId: payload.tutorProfileId,
@@ -46,30 +45,88 @@ const createBooking = async (
       },
     });
 
-    // Increment totalBookings, mark full if at capacity
     const newTotal = booked + 1;
+
     await tx.availabilitySlot.update({
       where: { id: payload.slotId },
       data: {
         totalBookings: newTotal,
-        isBooked:      newTotal >= capacity,
+        isBooked: newTotal >= capacity,
       },
     });
 
-    return booking;
+    const booking = await tx.booking.findFirst({
+      where: {
+        studentId,
+        slotId: payload.slotId,
+      },
+      include: {
+        tutorProfile: {
+          include: {
+            user: true,
+            category: true,
+          },
+        },
+        slot: true,
+      },
+    });
+
+    const review = await tx.review.findFirst({
+      where: {
+        studentId,
+        tutorProfileId: booking!.tutorProfileId,
+      },
+    });
+
+    return {
+      ...booking,
+      review: review || null,
+    };
   });
 };
 
 const getMyBookings = async (userId: string, role: "STUDENT" | "TUTOR") => {
   if (role === "STUDENT") {
-    return prisma.booking.findMany({
+    const bookings = await prisma.booking.findMany({
       where: { studentId: userId },
-      include: { tutorProfile: true, slot: true },
+      include: {
+        tutorProfile: {
+          include: {
+            user: true,
+            category: true,
+          },
+        },
+        slot: true,
+      },
+      orderBy: { createdAt: "desc" },
     });
+
+    const reviews = await prisma.review.findMany({
+      where: { studentId: userId },
+    });
+
+    const reviewMap = new Map(
+      reviews.map((r) => [r.tutorProfileId, r])
+    );
+
+    return bookings.map((b) => ({
+      ...b,
+      review: reviewMap.get(b.tutorProfileId) || null,
+    }));
   }
+
   return prisma.booking.findMany({
     where: { tutorProfile: { userId } },
-    include: { student: true, slot: true },
+    include: {
+      student: true,
+      slot: true,
+      tutorProfile: {
+        include: {
+          user: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -88,7 +145,7 @@ export const updateBookingStatusByTutor = async (
     throw new ApiError(httpStatus.FORBIDDEN, "You are not allowed to update this booking");
   }
 
-  const now           = new Date();
+  const now = new Date();
   const currentStatus = booking.status;
 
   if (
@@ -103,7 +160,7 @@ export const updateBookingStatusByTutor = async (
   }
 
   const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
-    PENDING:   [BookingStatus.CONFIRMED, BookingStatus.CANCELLED],
+    PENDING: [BookingStatus.CONFIRMED, BookingStatus.CANCELLED],
     CONFIRMED: [BookingStatus.COMPLETED, BookingStatus.CANCELLED],
     COMPLETED: [],
     CANCELLED: [],
@@ -117,45 +174,94 @@ export const updateBookingStatusByTutor = async (
     const updated = await tx.booking.update({
       where: { id: bookingId },
       data: { status },
+      include: {
+        tutorProfile: {
+          include: {
+            user: true,
+          },
+        },
+        slot: true,
+      },
     });
 
     if (status === BookingStatus.CANCELLED) {
       const slot = await tx.availabilitySlot.findUnique({
         where: { id: booking.slotId },
       });
+
       if (slot) {
         const newTotal = Math.max(0, (slot.totalBookings ?? 1) - 1);
+
         await tx.availabilitySlot.update({
           where: { id: booking.slotId },
           data: {
             totalBookings: newTotal,
-            isBooked:      newTotal >= (slot.maxCapacity ?? MAX_CAPACITY),
+            isBooked: newTotal >= (slot.maxCapacity ?? MAX_CAPACITY),
           },
         });
       }
     }
 
-    return updated;
+    const review = await tx.review.findFirst({
+      where: {
+        studentId: booking.studentId,
+        tutorProfileId: booking.tutorProfileId,
+      },
+    });
+
+    return {
+      ...updated,
+      review: review || null,
+    };
   });
 };
 
 export const autoCompleteBookings = async () => {
   const now = new Date();
+
   const bookings = await prisma.booking.findMany({
-    where: { status: BookingStatus.CONFIRMED, slot: { endTime: { lt: now } } },
+    where: {
+      status: BookingStatus.CONFIRMED,
+      slot: { endTime: { lt: now } },
+    },
   });
+
   return Promise.all(
     bookings.map((b) =>
-      prisma.booking.update({ where: { id: b.id }, data: { status: BookingStatus.COMPLETED } })
+      prisma.booking.update({
+        where: { id: b.id },
+        data: { status: BookingStatus.COMPLETED },
+      })
     )
   );
 };
 
 const getBookingById = async (id: string) => {
-  return prisma.booking.findUniqueOrThrow({
+  const booking = await prisma.booking.findUniqueOrThrow({
     where: { id },
-    include: { student: true, tutorProfile: true, slot: true },
+    include: {
+      student: true,
+      tutorProfile: {
+        include: {
+          user: true,
+          category: true,
+        },
+      },
+      slot: true,
+    },
   });
+
+  const review = await prisma.review.findFirst({
+    where: {
+      studentId: booking.studentId,
+      tutorProfileId: booking.tutorProfileId,
+    },
+  });
+
+  return {
+    ...booking,
+    review: review || null,
+  };
 };
 
 export const BookingService = {

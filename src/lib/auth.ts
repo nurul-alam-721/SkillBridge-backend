@@ -18,7 +18,7 @@ export const auth = betterAuth({
         required: false,
         input: true,
         validator: {
-          input: z.enum(["STUDENT", "TUTOR"]),
+          input: z.enum(["STUDENT", "TUTOR", "ADMIN"]),
         },
       },
       phone: {

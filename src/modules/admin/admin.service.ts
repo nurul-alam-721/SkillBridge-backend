@@ -3,82 +3,109 @@ import { prisma } from "../../lib/prisma";
 export type UserStatus = "ACTIVE" | "BANNED";
 
 const getStats = async () => {
-  return await prisma.$transaction(async (tx) => {
-    const [
-      totalStudents,
-      totalTutors,
-      totalBookings,
-      pendingBookings,
-      confirmedBookings,
-      completedBookings,
-      cancelledBookings,
-      totalCategories,
-      recentBookings,
-      revenueAgg,
-    ] = await Promise.all([
-      tx.user.count({ where: { role: "STUDENT" } }),
-      tx.user.count({ where: { role: "TUTOR" } }),
-      tx.booking.count(),
-      tx.booking.count({ where: { status: "PENDING" } }),
-      tx.booking.count({ where: { status: "CONFIRMED" } }),
-      tx.booking.count({ where: { status: "COMPLETED" } }),
-      tx.booking.count({ where: { status: "CANCELLED" } }),
-      tx.category.count(),
-      tx.booking.findMany({
-        take: 5,
-        orderBy: { createdAt: "desc" },
-        include: {
-          student: { select: { name: true, image: true } },
-          tutorProfile: {
-            include: {
-              user: { select: { name: true } },
-              category: { select: { name: true } },
-            },
+  const [
+    totalStudents,
+    totalTutors,
+    totalBookings,
+    pendingBookings,
+    confirmedBookings,
+    completedBookings,
+    cancelledBookings,
+    totalCategories,
+    recentBookings,
+  ] = await Promise.all([
+    prisma.user.count({ where: { role: "STUDENT" } }),
+    prisma.user.count({ where: { role: "TUTOR" } }),
+    prisma.booking.count(),
+    prisma.booking.count({ where: { status: "PENDING" } }),
+    prisma.booking.count({ where: { status: "CONFIRMED" } }),
+    prisma.booking.count({ where: { status: "COMPLETED" } }),
+    prisma.booking.count({ where: { status: "CANCELLED" } }),
+    prisma.category.count(),
+    prisma.booking.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        student: {
+          select: { name: true, image: true },
+        },
+        tutorProfile: {
+          select: {
+            hourlyRate: true,
+            user: { select: { name: true } },
+            category: { select: { name: true } },
           },
-          slot: { select: { startTime: true, endTime: true } },
         },
-      }),
-      tx.booking.findMany({
-        where: { status: "COMPLETED" },
-        include: {
-          tutorProfile: { select: { hourlyRate: true } },
-          slot: { select: { startTime: true, endTime: true } },
+        slot: {
+          select: { startTime: true, endTime: true },
         },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
-    const totalRevenue = revenueAgg.reduce((sum, booking) => {
+  let totalRevenue = 0;
+  const batchSize = 200;
+  let skip = 0;
+
+  while (true) {
+    const bookings = await prisma.booking.findMany({
+      where: { status: "COMPLETED" },
+      skip,
+      take: batchSize,
+      select: {
+        tutorProfile: { select: { hourlyRate: true } },
+        slot: { select: { startTime: true, endTime: true } },
+      },
+    });
+
+    if (bookings.length === 0) break;
+
+    for (const booking of bookings) {
       const start = new Date(booking.slot.startTime).getTime();
-      const end   = new Date(booking.slot.endTime).getTime();
+      const end = new Date(booking.slot.endTime).getTime();
       const hours = (end - start) / (1000 * 60 * 60);
-      return sum + booking.tutorProfile.hourlyRate * hours;
-    }, 0);
+      totalRevenue += booking.tutorProfile.hourlyRate * hours;
+    }
 
-    return {
-      totalStudents,
-      totalTutors,
-      totalUsers: totalStudents + totalTutors,
-      totalBookings,
-      pendingBookings,
-      confirmedBookings,
-      completedBookings,
-      cancelledBookings,
-      totalCategories,
-      totalRevenue: Math.round(totalRevenue),
-      recentActivity: recentBookings,
-    };
-  });
+    skip += batchSize;
+  }
+
+  return {
+    totalStudents,
+    totalTutors,
+    totalUsers: totalStudents + totalTutors,
+    totalBookings,
+    pendingBookings,
+    confirmedBookings,
+    completedBookings,
+    cancelledBookings,
+    totalCategories,
+    totalRevenue: Math.round(totalRevenue),
+    recentActivity: recentBookings,
+  };
 };
 
-const getAllBookings = async () => {
+const getAllBookings = async (page = 1, limit = 20) => {
   return await prisma.booking.findMany({
+    skip: (page - 1) * limit,
+    take: limit,
     orderBy: { createdAt: "desc" },
-    include: {
-      student: { select: { id: true, name: true, email: true, image: true } },
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      student: {
+        select: { id: true, name: true, email: true, image: true },
+      },
       tutorProfile: {
-        include: {
+        select: {
           user: { select: { name: true, email: true } },
           category: { select: { name: true } },
+          hourlyRate: true,
         },
       },
       slot: { select: { startTime: true, endTime: true } },
@@ -86,8 +113,10 @@ const getAllBookings = async () => {
   });
 };
 
-const getAllUsers = async () => {
+const getAllUsers = async (page = 1, limit = 20) => {
   return await prisma.user.findMany({
+    skip: (page - 1) * limit,
+    take: limit,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -109,4 +138,9 @@ const updateUserStatus = async (id: string, status: UserStatus) => {
   });
 };
 
-export const AdminService = { getStats, getAllBookings, getAllUsers, updateUserStatus };
+export const AdminService = {
+  getStats,
+  getAllBookings,
+  getAllUsers,
+  updateUserStatus,
+};

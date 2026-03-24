@@ -1,3 +1,4 @@
+import "dotenv/config"; 
 import express, { Application } from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
@@ -16,37 +17,28 @@ import { AdminRoutes } from "./modules/admin/admin.route";
 const app: Application = express();
 
 app.use(cors({
-    origin: process.env.APP_URL || "http://localhost:4000",
+    origin: [process.env.APP_URL || "http://localhost:3000", "http://localhost:4000"],
     credentials: true
-}))
+}));
+
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json());
 
-app.use("/api/users", userRoutes)
-
-app.use("/api/auth", authRoutes)
-
-app.use("/api/categories", categoryRoutes)
-
-app.use("/api/tutors", tutorRoutes)
-
+app.use("/api/users", userRoutes);
+app.use("/api/me", authRoutes);     
+app.use("/api/categories", categoryRoutes);
+app.use("/api/tutors", tutorRoutes);
 app.use("/api", AvailabilityRoutes);
-
 app.use("/api/bookings", bookingRoutes);
-
 app.use("/api/reviews", reviewRoutes);
-
 app.use("/api/", AdminRoutes);
 
-    
 app.get("/", (req, res) => {
     res.send("Hello from SkillBridge!");
 });
 
-app.all("/api/auth/*splat", toNodeHandler(auth));
-
 app.use(notFound);
-
 app.use(errorHandler);
 
 export default app;
