@@ -7,26 +7,25 @@ export enum UserRole {
     ADMIN = "ADMIN",
 }
 
-declare global {
-    namespace Express {
-        interface Request {
-            user?: {
-                id: string;
-                email: string;
-                name: string;
-                role: string;
-                emailVerified: boolean;
-            }
-        }
-    }
-}
 
 const auth = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const session = await betterAuth.api.getSession({
-                headers: req.headers as any
-            });
+            const sessionToken =
+                req.cookies?.["__Secure-session-token"] ||
+                req.cookies?.["session-token"];
+
+            const headers = new Headers();
+            
+            if (sessionToken) {
+                headers.set("cookie", `session-token=${sessionToken}`);
+            } else {
+                Object.entries(req.headers).forEach(([key, value]) => {
+                    if (value) headers.set(key, Array.isArray(value) ? value.join(",") : value);
+                });
+            }
+
+            const session = await betterAuth.api.getSession({ headers });
 
             if (!session) {
                 return res.status(401).json({

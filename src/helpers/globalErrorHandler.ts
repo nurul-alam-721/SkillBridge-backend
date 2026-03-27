@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../generated";
 
 export class ApiError extends Error {
   statusCode: number;
@@ -21,14 +21,12 @@ const errorHandler = (
   let message = "Internal Server Error";
   let error: any = undefined;
 
-  // Prisma validation errors
   if (err instanceof Prisma.PrismaClientValidationError) {
     statusCode = 400;
     message = "Invalid or missing fields in request";
     error = err.message;
   }
 
-  // Prisma known errors
   else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     statusCode = 400;
     message = "Database request error";
@@ -43,7 +41,6 @@ const errorHandler = (
     };
   }
 
-  // Custom API errors
   else if (err instanceof ApiError) {
     statusCode = err.statusCode;
     message = err.message;

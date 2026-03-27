@@ -5,7 +5,6 @@ import auth, { UserRole } from "../../middlewares/auth";
 const router: Router = express.Router();
 
 router.get("/admin/stats", auth(UserRole.ADMIN), AdminController.getStats);
-
 router.get(
   "/admin/bookings",
   auth(UserRole.ADMIN),
@@ -19,4 +18,4 @@ router.patch(
   AdminController.updateUserStatus,
 );
 
-export const AdminRoutes = router;
+export const AdminRoutes: Router = router; 

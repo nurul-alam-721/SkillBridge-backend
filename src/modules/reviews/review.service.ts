@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middlewares/auth";
-import { ApiError } from "../../middlewares/globalErrorHandler";
+import { ApiError } from "../../helpers/globalErrorHandler";
 import httpStatus from "http-status";
 
 interface ReviewPayload {

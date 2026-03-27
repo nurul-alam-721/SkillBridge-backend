@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
-import { ApiError } from "../../middlewares/globalErrorHandler";
+import { ApiError } from "../../helpers/globalErrorHandler";
 
 const TIME_24H_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 

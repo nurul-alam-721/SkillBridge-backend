@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { autoCompleteBookings, BookingService } from "./booking.service";
-import { ApiError } from "../../middlewares/globalErrorHandler";
+import { ApiError } from "../../helpers/globalErrorHandler";
 import { prisma } from "../../lib/prisma";
 import httpStatus from "http-status";
 import { get } from "node:http";

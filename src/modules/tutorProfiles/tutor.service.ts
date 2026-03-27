@@ -1,7 +1,7 @@
-import { Prisma, UserStatus } from "../../../generated/prisma/client";
+import { Prisma, UserStatus } from "../../generated";
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middlewares/auth";
-import { ApiError } from "../../middlewares/globalErrorHandler";
+import { ApiError } from "../../helpers/globalErrorHandler";
 import { TutorSortableFields } from "../../types/tutor.type";
 
 export interface TutorProfileData {

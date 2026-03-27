@@ -1,7 +1,7 @@
-import { BookingStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ApiError } from "../../middlewares/globalErrorHandler";
+import { ApiError } from "../../helpers/globalErrorHandler";
 import httpStatus from "http-status";
+import { BookingStatus } from "../../generated";
 
 const MAX_CAPACITY = 50;
 

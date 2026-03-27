@@ -1,12 +1,18 @@
 {
-  "name": "skillbridge-client",
+  "name": "skillbridge-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "SkillBridge Backend API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx watch src/server.ts",
-    "seed:admin": "npx tsx src/scripts/seedAdmin.ts"
+    "seed:admin": "npx tsx src/scripts/seedAdmin.ts",
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "lint": "eslint ./src/**/*",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -14,23 +20,24 @@
   "type": "module",
   "devDependencies": {
     "@prisma/client": "^7.4.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.3",
-    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.16.0",
     "prisma": "^7.4.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
     "better-auth": "^1.4.18",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "http-status": "^2.1.0",
-    "node-cron": "^4.2.1",
     "pg": "^8.18.0",
     "zod": "^4.3.6"
   }
