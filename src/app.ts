@@ -15,19 +15,22 @@ import { bookingRoutes } from "./modules/bookings/booking.route";
 import { reviewRoutes } from "./modules/reviews/review.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
 
-
 const app: Application = express();
 
 const allowedOrigins = [
   process.env.APP_URL,
   "http://localhost:3000",
   "https://skill-bridge-client-green.vercel.app",
-];
+].filter(Boolean) as string[];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /https:\/\/skill-bridge-client-.*\.vercel\.app/.test(origin)
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
