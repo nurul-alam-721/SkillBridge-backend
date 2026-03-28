@@ -13,7 +13,11 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  trustedOrigins: [process.env.FRONTEND_URL!, "http://localhost:3000"],
+  trustedOrigins: [
+    process.env.FRONTEND_URL!,
+    "http://localhost:3000",
+    "https://skill-bridge-client-green.vercel.app",
+  ].filter(Boolean),
 
   user: {
     additionalFields: {
@@ -77,5 +81,5 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [oAuthProxy()]
+  plugins: [oAuthProxy()],
 });
