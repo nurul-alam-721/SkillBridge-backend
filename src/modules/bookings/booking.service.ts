@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../helpers/globalErrorHandler";
 import httpStatus from "http-status";
-import { BookingStatus } from "../../generated";
+import { BookingStatus } from "@prisma/client";
 
 const MAX_CAPACITY = 50;
 

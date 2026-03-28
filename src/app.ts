@@ -15,12 +15,12 @@ import { bookingRoutes } from "./modules/bookings/booking.route";
 import { reviewRoutes } from "./modules/reviews/review.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
 
+
 const app: Application = express();
 
 const allowedOrigins = [
   process.env.APP_URL,
   "http://localhost:3000",
-  "http://localhost:4000",
   "https://skill-bridge-client-green.vercel.app",
 ];
 

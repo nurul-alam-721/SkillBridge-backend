@@ -1,25 +1,19 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "rootDir": "./src",
+    "module": "commonjs",
     "target": "ES2023",
     "types": ["node"],
     "lib": ["esnext"],
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
     "strict": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
+    "noImplicitAny": false,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "generated",
-    "src/generated"
-  ]
+  "exclude": ["node_modules", "dist", "generated"]
 }

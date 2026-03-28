@@ -11,9 +11,6 @@ dist/
 build/
 .next/
 
-# Prisma
-src/generated/
-generated/
 prisma/*.db
 prisma/*.db-journal
 
