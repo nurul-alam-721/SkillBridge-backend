@@ -17,33 +17,21 @@ import { AdminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
 
-const allowedOrigins = [
-  process.env.APP_URL,
-  "http://localhost:3000",
-  "https://skill-bridge-client-green.vercel.app",
-].filter(Boolean) as string[];
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        /https:\/\/skill-bridge-client-.*\.vercel\.app/.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
   })
 );
 
+
 app.use(cookieParser());
 app.use(express.json());
 
+app.set("trust proxy", true);
+
 app.all("/api/auth/*path", toNodeHandler(auth));
+
 
 app.use("/api/users", userRoutes);
 app.use("/api/me", authRoutes);
@@ -54,11 +42,15 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/", AdminRoutes);
 
+
 app.get("/", (req, res) => {
   res.send("Hello from SkillBridge!");
 });
 
+
 app.use(notFound);
+
 app.use(errorHandler);
+
 
 export default app;
