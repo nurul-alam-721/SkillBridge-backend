@@ -16,6 +16,7 @@ export const auth = betterAuth({
     process.env.FRONTEND_URL!,
     "http://localhost:3000",
     "https://skill-bridge-client-green.vercel.app",
+     process.env.BETTER_AUTH_URL!
   ].filter(Boolean),
 
   user: {
