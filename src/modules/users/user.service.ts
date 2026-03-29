@@ -1,12 +1,5 @@
 import { prisma } from "../../lib/prisma";
-
-const getAllUsers = async () => {
-  return prisma.user.findMany({
-    select: { id: true, name: true, email: true, role: true, status: true },
-  });
-};
-
-
+import { UserRole } from "../../middlewares/auth";
 
 type UpdateOwnProfilePayload = {
   name?: string;
@@ -14,9 +7,22 @@ type UpdateOwnProfilePayload = {
   image?: string;
 };
 
+const getAllUsers = async () => {
+  return prisma.user.findMany({
+    select: { id: true, name: true, email: true, role: true, status: true },
+  });
+};
+
+const updateMyRole = async (userId: string, role: UserRole) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { role },
+  });
+};
+
 const updateOwnProfile = async (
   userId: string,
-  payload: UpdateOwnProfilePayload
+  payload: UpdateOwnProfilePayload,
 ) => {
   return prisma.user.update({
     where: { id: userId },
@@ -34,9 +40,8 @@ const updateOwnProfile = async (
   });
 };
 
-
-
 export const userService = {
   getAllUsers,
-  updateOwnProfile
+  updateOwnProfile,
+  updateMyRole,
 };

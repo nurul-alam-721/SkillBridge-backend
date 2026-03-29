@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { paginationSortingHelper } from "../../helpers/paginationSortingHelper";
 import { GetAllTutorsParams, tutorService } from "./tutor.service";
-import { TutorSortableFields } from "../../types/tutor.type";
+import { TutorSortableFields } from "../../types/types";
 
 const createTutorProfile = async (
   req: Request,
