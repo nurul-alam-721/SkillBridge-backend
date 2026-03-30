@@ -12,7 +12,10 @@ router.put(
   userController.updateMyProfile
 );
 
-
-
+router.patch(
+  "/me/role",
+  auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.TUTOR),
+  userController.updateMyRole
+);
 
 export const userRoutes: Router = router;
