@@ -44,7 +44,6 @@ export const auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       prompt: "select_account",
-      redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
     },
   },
 
@@ -55,20 +54,14 @@ export const auth = betterAuth({
   },
 
   advanced: {
-    useSecureCookies: process.env.NODE_ENV === "production",
-    cookies: {
-      session_token: {
-        name: "better-auth.session_token",
-        attributes: {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          domain: process.env.NODE_ENV === "production" 
-            ? ".onrender.com"
-            : undefined,
-        },
-      },
+    useSecureCookies: true,
+    crossSubdomainCookies: {
+      enabled: false,
+    },
+    defaultCookieAttributes: {
+      secure: true,
+      sameSite: "none",
+      partitioned: true,
     },
   },
 });

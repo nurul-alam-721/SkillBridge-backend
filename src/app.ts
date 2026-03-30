@@ -17,28 +17,25 @@ import { AdminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL!,
+  "https://skill-bridge-client-green.vercel.app",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        "https://skill-bridge-client-green.vercel.app",
-        "http://localhost:3000",
-        process.env.FRONTEND_URL,
-      ].filter(Boolean);
-
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else if (process.env.NODE_ENV !== "production") {
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  }),
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 app.use(cookieParser());
