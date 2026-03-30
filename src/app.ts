@@ -19,11 +19,27 @@ const app: Application = express();
 
 app.use(
   cors({
-    origin: true,
-    credentials: true,
-  })
-);
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "https://skill-bridge-client-green.vercel.app",
+        "http://localhost:3000",
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
 
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else if (process.env.NODE_ENV !== "production") {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  }),
+);
 
 app.use(cookieParser());
 app.use(express.json());
@@ -31,7 +47,6 @@ app.use(express.json());
 app.set("trust proxy", true);
 
 app.all("/api/auth/*path", toNodeHandler(auth));
-
 
 app.use("/api/users", userRoutes);
 app.use("/api/me", authRoutes);
@@ -42,15 +57,11 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/", AdminRoutes);
 
-
 app.get("/", (req, res) => {
   res.send("Hello from SkillBridge!");
 });
 
-
 app.use(notFound);
-
 app.use(errorHandler);
-
 
 export default app;
