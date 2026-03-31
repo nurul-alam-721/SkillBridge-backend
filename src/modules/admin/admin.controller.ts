@@ -5,32 +5,26 @@ import { AdminService } from "./admin.service";
 const getStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const stats = await AdminService.getStats();
-    res
-      .status(httpStatus.OK)
-      .json({
-        success: true,
-        message: "Admin stats fetched successfully",
-        data: stats,
-      });
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "Admin stats fetched successfully",
+      data: stats,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-const getAllBookings = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const getAllBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bookings = await AdminService.getAllBookings();
-    res
-      .status(httpStatus.OK)
-      .json({
-        success: true,
-        message: "All bookings fetched successfully",
-        data: bookings,
-      });
+    const page  = parseInt(req.query.page  as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const bookings = await AdminService.getAllBookings(page, limit);
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "All bookings fetched successfully",
+      data: bookings,
+    });
   } catch (error) {
     next(error);
   }
@@ -38,35 +32,29 @@ const getAllBookings = async (
 
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await AdminService.getAllUsers();
-    res
-      .status(httpStatus.OK)
-      .json({
-        success: true,
-        message: "All users fetched successfully",
-        data: users,
-      });
+    const page  = parseInt(req.query.page  as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const users = await AdminService.getAllUsers(page, limit);
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "All users fetched successfully",
+      data: users,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-const updateUserStatus = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const updateUserStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
     const user = await AdminService.updateUserStatus(id as string, status);
-    res
-      .status(httpStatus.OK)
-      .json({
-        success: true,
-        message: `User ${status === "BANNED" ? "banned" : "activated"} successfully`,
-        data: user,
-      });
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: `User ${status === "BANNED" ? "banned" : "activated"} successfully`,
+      data: user,
+    });
   } catch (error) {
     next(error);
   }
