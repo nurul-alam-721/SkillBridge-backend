@@ -14,7 +14,7 @@ router.put(
 
 router.patch(
   "/me/role",
-  auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.TUTOR),
+  auth(UserRole.STUDENT, UserRole.TUTOR),
   userController.updateMyRole
 );
 
