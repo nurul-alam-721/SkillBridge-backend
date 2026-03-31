@@ -121,6 +121,9 @@ const getTutorSlots = async (tutorProfileId: string) => {
 const deleteSlot = async (slotId: string, tutorProfileId: string) => {
   const slot = await prisma.availabilitySlot.findUnique({
     where: { id: slotId },
+    include: {
+      bookings: true,
+    },
   });
 
   if (!slot) {
@@ -134,14 +137,16 @@ const deleteSlot = async (slotId: string, tutorProfileId: string) => {
     );
   }
 
-  if (slot.isBooked) {
+  if (slot.bookings.length > 0) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "Cannot delete a booked slot. Cancel the booking first"
+      "This slot already has student bookings and cannot be deleted"
     );
   }
 
-  await prisma.availabilitySlot.delete({ where: { id: slotId } });
+  await prisma.availabilitySlot.delete({
+    where: { id: slotId },
+  });
 
   return null;
 };
@@ -162,7 +167,7 @@ const getPublicSlotsByTutor = async (
         select: {
           id: true,
           userId: true,
-           user: {
+          user: {
             select: {
               name: true,
               email: true,
@@ -173,14 +178,12 @@ const getPublicSlotsByTutor = async (
           experience: true,
           rating: true,
           totalReviews: true,
-         
         },
       },
     },
     orderBy: { startTime: "asc" },
   });
 };
-
 
 const getSlotsByTutorGroupedByDate = async (tutorProfileId: string) => {
   const slots = await prisma.availabilitySlot.findMany({
