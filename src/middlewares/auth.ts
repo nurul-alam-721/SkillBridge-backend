@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { auth as betterAuth } from '../lib/auth';
 import { fromNodeHeaders } from "better-auth/node";
+import { prisma } from "../lib/prisma";
 
 export enum UserRole {
   STUDENT = "STUDENT",
@@ -19,6 +20,26 @@ const auth = (...roles: UserRole[]) => {
         return res.status(401).json({
           success: false,
           message: "You are not authorized!",
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true, role: true, status: true },
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User account not found.",
+        });
+      }
+
+      if (user.status === "BANNED") {
+        return res.status(403).json({
+          success: false,
+          code: "ACCOUNT_BANNED",
+          message: "Your account has been suspended. Please contact support if you believe this is a mistake.",
         });
       }
 
