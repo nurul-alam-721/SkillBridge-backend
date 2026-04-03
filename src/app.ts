@@ -43,6 +43,10 @@ app.use(express.json());
 
 app.set("trust proxy", true);
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.all("/api/auth/*path", toNodeHandler(auth));
 
 app.use("/api/users", userRoutes);
