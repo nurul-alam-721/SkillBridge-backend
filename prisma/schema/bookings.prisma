@@ -9,6 +9,7 @@ model Booking {
   slot           AvailabilitySlot @relation("SlotBookings", fields: [slotId], references: [id])
   student        User             @relation("StudentBookings", fields: [studentId], references: [id])
   tutorProfile   TutorProfile     @relation("TutorBookings", fields: [tutorProfileId], references: [id])
+  payment        Payment?         @relation("BookingPayment")
 }
 
 enum BookingStatus {

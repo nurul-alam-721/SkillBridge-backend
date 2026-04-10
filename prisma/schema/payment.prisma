@@ -1,0 +1,22 @@
+model Payment {
+  id              String        @id @default(uuid())
+  bookingId       String        @unique
+  studentId       String
+  amount          Float
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  transactionId   String?       @unique
+  paymentMethod   String?       
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  booking         Booking       @relation("BookingPayment", fields: [bookingId], references: [id])
+  student         User          @relation("StudentPayments", fields: [studentId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}

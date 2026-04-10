@@ -11,6 +11,7 @@ model User {
   updatedAt     DateTime      @updatedAt
   accounts      Account[]
   bookings      Booking[]     @relation("StudentBookings")
+  payments      Payment[]     @relation("StudentPayments")
   reviews       Review[]
   sessions      Session[]
   tutorProfile  TutorProfile?
