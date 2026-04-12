@@ -14,7 +14,7 @@ export const prisma =
     errorFormat: process.env.NODE_ENV === "production" ? "minimal" : "pretty",
     log:
       process.env.NODE_ENV === "development"
-        ? ["query", "info", "warn", "error"]
+        ? ["warn", "error"]
         : ["warn", "error"],
   });
 

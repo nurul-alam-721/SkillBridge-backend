@@ -1,79 +1,72 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { userService } from "./user.service";
-import { UserRole } from "../../middlewares/auth";
+import catchAsync from "../../helpers/catchAsync";
+import httpStatus from "http-status";
 
-const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const users = await userService.getAllUsers();
-    res.status(200).json({
-      success: true,
-      message: "Alll Users fetched successfully!",
-      data: users,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userService.getAllUsers();
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Users fetched successfully",
+    data: result,
+  });
+});
 
-const updateMyProfile = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
+const getUserById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await userService.getById(id as string);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "User fetched successfully",
+    data: result,
+  });
+});
 
-    const userId = req.user.id;
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await userService.updateStatus(id as string, req.body);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "User status/role updated successfully",
+    data: result,
+  });
+});
 
-    const { name, phone, image } = req.body;
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  const result = await userService.getById(userId);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Profile fetched successfully",
+    data: result,
+  });
+});
 
-    const result = await userService.updateOwnProfile(userId, {
-      name,
-      phone,
-      image,
-    });
+const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  const result = await userService.updateOwnProfile(userId, req.body);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Profile updated successfully",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+const updateMyRole = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  const result = await userService.updateMyRole(userId, req.body.role);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "User role updated successfully",
+    data: result,
+  });
+});
 
-
-const updateMyRole = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { role } = req.body;
-
-    if (!["STUDENT", "TUTOR"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid role",
-      });
-    }
-
-    const user = await userService.updateMyRole(req?.user?.id as string, role as UserRole); 
-
-    res.status(200).json({
-      success: true,
-      message: "Role updated successfully",
-      data: user,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const userController = {
+export const UserController = {
   getAllUsers,
+  getUserById,
+  updateUser,
+  getMyProfile,
   updateMyProfile,
   updateMyRole,
 };

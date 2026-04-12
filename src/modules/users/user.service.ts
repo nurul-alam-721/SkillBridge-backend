@@ -40,8 +40,41 @@ const updateOwnProfile = async (
   });
 };
 
+const getById = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      image: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+const updateStatus = async (userId: string, data: any) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+    },
+  });
+};
+
 export const userService = {
   getAllUsers,
+  getById,
   updateOwnProfile,
   updateMyRole,
+  updateStatus,
 };

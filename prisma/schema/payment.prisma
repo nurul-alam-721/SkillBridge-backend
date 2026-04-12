@@ -3,7 +3,7 @@ model Payment {
   bookingId       String        @unique
   studentId       String
   amount          Float
-  currency        String        @default("usd")
+  currency        String        @default("bdt")
   status          PaymentStatus @default(PENDING)
   transactionId   String?       @unique
   paymentMethod   String?       

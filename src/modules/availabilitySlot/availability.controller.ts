@@ -1,150 +1,81 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
+import { AvailabilityService } from "./availability.service";
+import catchAsync from "../../helpers/catchAsync";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
-import { AvailabilityService } from "./availability.service";
+import { ApiError } from "../../helpers/globalErrorHandler";
 
-const getTutorProfile = async (userId: string) => {
-  return prisma.tutorProfile.findUnique({ where: { userId } });
-};
+const createSlot = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  
+  const tutorProfile = await prisma.tutorProfile.findUnique({
+    where: { userId }
+  });
 
-const createAvailabilitySlot = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.user?.id as string;
-    const tutorProfile = await getTutorProfile(userId);
-
-    if (!tutorProfile) {
-      return res.status(httpStatus.NOT_FOUND).json({
-        success: false,
-        message: "Tutor profile not found",
-      });
-    }
-
-    const slot = await AvailabilityService.createAvailabilitySlot(
-      tutorProfile.id,
-      req.body
-    );
-
-    res.status(httpStatus.CREATED).json({
-      success: true,
-      message: "Availability slot created successfully",
-      data: slot,
-    });
-  } catch (error) {
-    next(error);
+  if (!tutorProfile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Tutor profile not found");
   }
-};
 
-const getTutorSlots = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.user?.id as string;
-    const tutorProfile = await getTutorProfile(userId);
+  const result = await AvailabilityService.createAvailabilitySlot(tutorProfile.id, req.body);
+  res.status(httpStatus.CREATED).json({
+    success: true,
+    message: "Availability slot created successfully",
+    data: result,
+  });
+});
 
-    if (!tutorProfile) {
-      return res.status(httpStatus.NOT_FOUND).json({
-        success: false,
-        message: "Tutor profile not found",
-      });
-    }
+const getMySlots = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  
+  const tutorProfile = await prisma.tutorProfile.findUnique({
+    where: { userId }
+  });
 
-    const slots = await AvailabilityService.getTutorSlots(tutorProfile.id);
-
-    res.status(httpStatus.OK).json({
-      success: true,
-      message: "Your availability slots fetched successfully",
-      data: slots,
-    });
-  } catch (error) {
-    next(error);
+  if (!tutorProfile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Tutor profile not found");
   }
-};
 
-const deleteSlot = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.user?.id as string;
-    const { slotId } = req.params;
-    const tutorProfile = await getTutorProfile(userId);
+  const result = await AvailabilityService.getTutorSlots(tutorProfile.id);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "My availability slots fetched successfully",
+    data: result,
+  });
+});
 
-    if (!tutorProfile) {
-      return res.status(httpStatus.NOT_FOUND).json({
-        success: false,
-        message: "Tutor profile not found",
-      });
-    }
+const getTutorSlots = catchAsync(async (req: Request, res: Response) => {
+  const { tutorProfileId } = req.params;
+  const result = await AvailabilityService.getTutorSlots(tutorProfileId as string);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Tutor availability slots fetched successfully",
+    data: result,
+  });
+});
 
-    await AvailabilityService.deleteSlot(slotId as string, tutorProfile.id);
+const deleteSlot = catchAsync(async (req: Request, res: Response) => {
+  const { id: slotId } = req.params;
+  const userId = req.user?.id!;
+  
+  const tutorProfile = await prisma.tutorProfile.findUnique({
+    where: { userId }
+  });
 
-    res.status(httpStatus.OK).json({
-      success: true,
-      message: "Availability slot deleted successfully",
-      data: null,
-    });
-  } catch (error) {
-    next(error);
+  if (!tutorProfile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Tutor profile not found");
   }
-};
 
-const getPublicSlotsByTutor = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { tutorProfileId } = req.params;
-    const date = req.query.date as string | undefined;
-
-    const slots = await AvailabilityService.getPublicSlotsByTutor(
-      tutorProfileId as string,
-      date
-    );
-
-    res.status(httpStatus.OK).json({
-      success: true,
-      message: "Available slots of the tutor fetched successfully",
-      data: slots,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getSlotsByTutorGroupedByDate = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { tutorProfileId } = req.params;
-
-    const slots = await AvailabilityService.getSlotsByTutorGroupedByDate(
-      tutorProfileId as string
-    );
-
-    res.status(httpStatus.OK).json({
-      success: true,
-      message: "Slots fetched and grouped by date successfully",
-      data: slots,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  await AvailabilityService.deleteSlot(slotId as string, tutorProfile.id);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Availability slot deleted successfully",
+    data: null,
+  });
+});
 
 export const AvailabilityController = {
-  createAvailabilitySlot,
+  createSlot,
+  getMySlots,
   getTutorSlots,
   deleteSlot,
-  getPublicSlotsByTutor,
-  getSlotsByTutorGroupedByDate,
 };

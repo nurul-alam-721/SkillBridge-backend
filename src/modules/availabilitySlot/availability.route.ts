@@ -1,35 +1,39 @@
 import express, { Router } from "express";
-import { AvailabilityController } from "./availability.controller";
 import auth, { UserRole } from "../../middlewares/auth";
+import validateRequest from "../../middlewares/validateRequest";
+import { AvailabilityController } from "./availability.controller";
+import { AvailabilityValidation } from "./availability.validation";
 
 const router: Router = express.Router();
 
 router.post(
-  "/tutor/availability",
+  "/",
   auth(UserRole.TUTOR),
-  AvailabilityController.createAvailabilitySlot
+  validateRequest(AvailabilityValidation.createSlotSchema),
+  AvailabilityController.createSlot
 );
 
 router.get(
-  "/tutor/availability",
+  "/",
   auth(UserRole.TUTOR),
+  AvailabilityController.getMySlots
+);
+
+router.get(
+  "/me",
+  auth(UserRole.TUTOR),
+  AvailabilityController.getMySlots
+);
+
+router.get(
+  "/tutor/:tutorProfileId",
   AvailabilityController.getTutorSlots
 );
 
 router.delete(
-  "/tutor/availability/:slotId",
+  "/:id",
   auth(UserRole.TUTOR),
   AvailabilityController.deleteSlot
-);
-
-router.get(
-  "/availability/tutor/:tutorProfileId",
-  AvailabilityController.getPublicSlotsByTutor
-);
-
-router.get(
-  "/tutor/availability/:tutorProfileId/grouped",
-  AvailabilityController.getSlotsByTutorGroupedByDate
 );
 
 export const AvailabilityRoutes = router;

@@ -14,6 +14,7 @@ import { AvailabilityRoutes } from "./modules/availabilitySlot/availability.rout
 import { bookingRoutes } from "./modules/bookings/booking.route";
 import { reviewRoutes } from "./modules/reviews/review.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
+import { paymentRoutes } from "./modules/payments/payment.route";
 
 const app: Application = express();
 
@@ -49,14 +50,20 @@ app.get("/api/health", (req, res) => {
 
 app.all("/api/auth/*path", toNodeHandler(auth));
 
+app.get("/api/ping", (req, res) => {
+  res.json({ message: "pong", timestamp: new Date().toISOString() });
+});
+
+app.use("/api/payments", paymentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/me", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/tutors", tutorRoutes);
-app.use("/api", AvailabilityRoutes);
+app.use("/api/tutor/availability", AvailabilityRoutes);
+app.use("/api/availability-slots", AvailabilityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
-app.use("/api/", AdminRoutes);
+app.use("/api/admin", AdminRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from SkillBridge!");

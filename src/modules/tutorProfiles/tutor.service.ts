@@ -80,21 +80,23 @@ const getMyProfile = async (userId: string) => {
 };
 
 const getAllTutors = async (params: GetAllTutorsParams) => {
-  if (!params.limit || params.limit <= 0) {
+  const page = Number(params.page) || 1;
+  const limit = Number(params.limit) || 10;
+  const skip = params.skip !== undefined ? Number(params.skip) : (page - 1) * limit;
+  
+  const minRate = params.minRate !== undefined ? Number(params.minRate) : undefined;
+  const maxRate = params.maxRate !== undefined ? Number(params.maxRate) : undefined;
+  const minRating = params.minRating !== undefined ? Number(params.minRating) : undefined;
+  const minExperience = params.minExperience !== undefined ? Number(params.minExperience) : undefined;
+
+  if (limit <= 0) {
     throw new ApiError(400, "Limit must be a positive integer");
   }
 
   const {
     search,
     categoryId,
-    minRate,
-    maxRate,
-    minRating,
-    minExperience,
     availableDate,
-    page,
-    limit,
-    skip,
     sortBy,
     sortOrder,
   } = params;

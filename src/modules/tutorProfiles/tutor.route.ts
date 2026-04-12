@@ -1,19 +1,49 @@
 import express, { Router } from "express";
-
-import { tutorController } from "./tutor.controller";
 import auth, { UserRole } from "../../middlewares/auth";
+import validateRequest from "../../middlewares/validateRequest";
+import { TutorController } from "./tutor.controller";
+import { TutorValidation } from "./tutor.validation";
 
 const router: Router = express.Router();
 
-router.get("/me/stats", auth(UserRole.TUTOR), tutorController.getTutorStats);
-router.get("/me", auth(UserRole.TUTOR), tutorController.getMyProfile);
+router.get("/", TutorController.getAllTutors);
+
+router.get(
+  "/me/stats",
+  auth(UserRole.TUTOR),
+  TutorController.getTutorStats
+);
+
+router.get("/me", auth(UserRole.TUTOR), TutorController.getMyTutorProfile);
+
+router.get("/:id", TutorController.getTutorById);
+
 router.post(
   "/create-profile",
   auth(UserRole.TUTOR),
-  tutorController.createTutorProfile,
+  validateRequest(TutorValidation.createTutorProfileSchema),
+  TutorController.createTutorProfile
 );
-router.put("/me", auth(UserRole.TUTOR), tutorController.updateTutorProfile);
-router.get("/", tutorController.getAllTutors);
-router.get("/:id", tutorController.getTutorById);
 
-export const tutorRoutes: Router = router;
+router.post(
+  "/",
+  auth(UserRole.TUTOR),
+  validateRequest(TutorValidation.createTutorProfileSchema),
+  TutorController.createTutorProfile
+);
+
+router.patch(
+  "/me",
+  auth(UserRole.TUTOR),
+  validateRequest(TutorValidation.updateTutorProfileSchema),
+  TutorController.updateTutorProfile
+);
+
+router.put(
+  "/me",
+  auth(UserRole.TUTOR),
+  validateRequest(TutorValidation.updateTutorProfileSchema),
+  TutorController.updateTutorProfile
+);
+
+export const tutorRoutes = router;

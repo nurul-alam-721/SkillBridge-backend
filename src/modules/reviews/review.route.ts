@@ -1,15 +1,27 @@
-import { Router } from "express";
-import { ReviewController } from "./review.controller";
+import express, { Router } from "express";
 import auth, { UserRole } from "../../middlewares/auth";
+import validateRequest from "../../middlewares/validateRequest";
+import { ReviewController } from "./review.controller";
+import { ReviewValidation } from "./review.validation";
 
-const router:Router = Router();
+const router: Router = express.Router();
 
-router.get("/:tutorProfileId", ReviewController.getReviewsByTutor);
+router.post(
+  "/",
+  auth(UserRole.STUDENT),
+  validateRequest(ReviewValidation.createReviewSchema),
+  ReviewController.createReview
+);
 
-router.post("/", auth(UserRole.STUDENT), ReviewController.createReview);
+router.get(
+  "/tutor/:tutorProfileId",
+  ReviewController.getTutorReviews
+);
 
-router.put("/:id", auth(UserRole.STUDENT), ReviewController.updateReview);
-
-router.delete("/:id", auth(UserRole.STUDENT, UserRole.ADMIN), ReviewController.deleteReview);
+router.get(
+  "/me",
+  auth(UserRole.STUDENT),
+  ReviewController.getMyReviews
+);
 
 export const reviewRoutes = router;
