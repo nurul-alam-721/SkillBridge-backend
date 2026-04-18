@@ -56,7 +56,7 @@ const getTutorSlots = catchAsync(async (req: Request, res: Response) => {
 const deleteSlot = catchAsync(async (req: Request, res: Response) => {
   const { id: slotId } = req.params;
   const userId = req.user?.id!;
-  
+
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId }
   });
@@ -73,9 +73,35 @@ const deleteSlot = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateSlot = catchAsync(async (req: Request, res: Response) => {
+  const { id: slotId } = req.params;
+  const userId = req.user?.id!;
+
+  const tutorProfile = await prisma.tutorProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!tutorProfile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Tutor profile not found");
+  }
+
+  const result = await AvailabilityService.updateAvailabilitySlot(
+    slotId as string,
+    tutorProfile.id,
+    req.body
+  );
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Availability slot updated successfully",
+    data: result,
+  });
+});
+
 export const AvailabilityController = {
   createSlot,
   getMySlots,
   getTutorSlots,
   deleteSlot,
+  updateSlot,
 };

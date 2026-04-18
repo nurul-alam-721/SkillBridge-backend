@@ -1,30 +1,8 @@
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middlewares/auth";
 import { ApiError } from "../../helpers/globalErrorHandler";
-import { TutorSortableFields } from "../../types/types";
 import { Prisma, UserStatus } from "@prisma/client";
-
-export interface TutorProfileData {
-  bio?: string;
-  hourlyRate: number;
-  experience: number;
-  categoryId: string;
-}
-
-export type GetAllTutorsParams = {
-  search?: string;
-  categoryId?: string;
-  minRate?: number;
-  maxRate?: number;
-  minRating?: number;
-  minExperience?: number;
-  availableDate?: string;
-  page: number;
-  limit: number;
-  skip: number;
-  sortBy: TutorSortableFields;
-  sortOrder: "asc" | "desc";
-};
+import { TutorProfileData, GetAllTutorsParams } from "./tutor.interface";
 
 const createTutorProfile = async (userId: string, data: TutorProfileData) => {
   if (!userId) throw new Error("User not logged in");

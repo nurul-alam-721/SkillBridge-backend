@@ -30,6 +30,13 @@ router.get(
   AvailabilityController.getTutorSlots
 );
 
+router.patch(
+  "/:id",
+  auth(UserRole.TUTOR),
+  validateRequest(AvailabilityValidation.updateSlotSchema),
+  AvailabilityController.updateSlot
+);
+
 router.delete(
   "/:id",
   auth(UserRole.TUTOR),

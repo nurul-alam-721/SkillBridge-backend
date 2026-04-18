@@ -1,6 +1,7 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../helpers/globalErrorHandler";
+import { CreateAvailabilitySlotPayload, UpdateAvailabilitySlotPayload } from "./availability.interface";
 
 const TIME_24H_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -28,11 +29,7 @@ const buildDateTime = (date: string, time: string): Date => {
 
 const createAvailabilitySlot = async (
   tutorProfileId: string,
-  payload: {
-    date: string;
-    startTime: string;
-    endTime: string;
-  }
+  payload: CreateAvailabilitySlotPayload
 ) => {
   validateTimeFormat(payload.startTime);
   validateTimeFormat(payload.endTime);
@@ -185,6 +182,90 @@ const getPublicSlotsByTutor = async (
   });
 };
 
+const updateAvailabilitySlot = async (
+  slotId: string,
+  tutorProfileId: string,
+  payload: UpdateAvailabilitySlotPayload
+) => {
+  const slot = await prisma.availabilitySlot.findUnique({
+    where: { id: slotId },
+    include: { bookings: true },
+  });
+
+  if (!slot) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Slot not found");
+  }
+
+  if (slot.tutorProfileId !== tutorProfileId) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized to update this slot"
+    );
+  }
+
+  if (slot.isBooked || slot.bookings.length > 0) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "This slot is already booked and cannot be updated"
+    );
+  }
+
+  const updateData: any = {};
+  if (payload.maxCapacity !== undefined) updateData.maxCapacity = payload.maxCapacity;
+
+  if (payload.date || payload.startTime || payload.endTime) {
+    const newDate = payload.date || slot.date.toISOString().split("T")[0]!;
+    const newStartTime = payload.startTime || slot.startTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const newEndTime = payload.endTime || slot.endTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+    validateTimeFormat(newStartTime);
+    validateTimeFormat(newEndTime);
+
+    const start = buildDateTime(newDate, newStartTime);
+    const end = buildDateTime(newDate, newEndTime);
+
+    if (start <= new Date()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Cannot update availability to the past");
+    }
+
+    if (end <= start) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "End time must be after start time");
+    }
+
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    if (durationHours < MIN_SLOT_HOURS) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Availability slot must be at least 1 hour");
+    }
+
+    if (start.getHours() < WORKING_HOUR_START || end.getHours() > WORKING_HOUR_END) {
+       throw new ApiError(httpStatus.BAD_REQUEST, "Availability must be between 09:00 AM and 04:00 PM");
+    }
+
+    const overlap = await prisma.availabilitySlot.findFirst({
+      where: {
+        tutorProfileId,
+        id: { not: slotId },
+        date: new Date(newDate),
+        startTime: { lt: end },
+        endTime: { gt: start },
+      },
+    });
+
+    if (overlap) {
+      throw new ApiError(httpStatus.CONFLICT, "Updated slot overlaps with another existing slot");
+    }
+
+    updateData.date = new Date(newDate);
+    updateData.startTime = start;
+    updateData.endTime = end;
+  }
+
+  return prisma.availabilitySlot.update({
+    where: { id: slotId },
+    data: updateData,
+  });
+};
+
 const getSlotsByTutorGroupedByDate = async (tutorProfileId: string) => {
   const slots = await prisma.availabilitySlot.findMany({
     where: {
@@ -209,6 +290,7 @@ export const AvailabilityService = {
   createAvailabilitySlot,
   getTutorSlots,
   deleteSlot,
+  updateAvailabilitySlot,
   getPublicSlotsByTutor,
   getSlotsByTutorGroupedByDate,
 };

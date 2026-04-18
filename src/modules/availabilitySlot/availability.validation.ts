@@ -9,6 +9,16 @@ const createSlotSchema = z.object({
   }),
 });
 
+const updateSlotSchema = z.object({
+  body: z.object({
+    date: z.string().optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    maxCapacity: z.number().optional(),
+  }),
+});
+
 export const AvailabilityValidation = {
   createSlotSchema,
+  updateSlotSchema,
 };

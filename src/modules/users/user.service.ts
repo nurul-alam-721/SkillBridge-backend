@@ -1,11 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middlewares/auth";
-
-type UpdateOwnProfilePayload = {
-  name?: string;
-  phone?: string;
-  image?: string;
-};
+import { UpdateOwnProfilePayload } from "./user.interface";
 
 const getAllUsers = async () => {
   return prisma.user.findMany({

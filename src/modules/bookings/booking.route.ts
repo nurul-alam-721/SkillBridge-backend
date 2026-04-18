@@ -33,5 +33,10 @@ router.get(
   BookingController.getBookingById
 );
 
+router.delete(
+  "/:id",
+  auth(UserRole.STUDENT),
+  BookingController.cancelBooking
+);
 
 export const bookingRoutes = router;

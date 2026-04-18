@@ -1,6 +1,5 @@
 import { prisma } from "../../lib/prisma";
-
-export type UserStatus = "ACTIVE" | "BANNED";
+import { UserStatus } from "./admin.interface";
 
 const getStats = async () => {
   const [

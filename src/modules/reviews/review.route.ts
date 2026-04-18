@@ -24,4 +24,16 @@ router.get(
   ReviewController.getMyReviews
 );
 
+router.put(
+  "/:id",
+  auth(UserRole.STUDENT),
+  ReviewController.updateReview
+);
+
+router.delete(
+  "/:id",
+  auth(UserRole.STUDENT, UserRole.ADMIN),
+  ReviewController.deleteReview
+);
+
 export const reviewRoutes = router;

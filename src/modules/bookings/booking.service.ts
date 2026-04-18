@@ -2,12 +2,13 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../helpers/globalErrorHandler";
 import httpStatus from "http-status";
 import { BookingStatus } from "@prisma/client";
+import { CreateBookingPayload, BookingUserRole } from "./booking.interface";
 
 const MAX_CAPACITY = 50;
 
 const createBooking = async (
   studentId: string,
-  payload: { tutorProfileId: string; slotId: string }
+  payload: CreateBookingPayload
 ) => {
   return prisma.$transaction(async (tx) => {
     const slot = await tx.availabilitySlot.findUnique({
@@ -85,7 +86,7 @@ const createBooking = async (
   });
 };
 
-const getMyBookings = async (userId: string, role: "STUDENT" | "TUTOR") => {
+const getMyBookings = async (userId: string, role: BookingUserRole) => {
   if (role === "STUDENT") {
     const bookings = await prisma.booking.findMany({
       where: { studentId: userId },
@@ -264,9 +265,47 @@ const getBookingById = async (id: string) => {
   };
 };
 
+const cancelBooking = async (bookingId: string, studentId: string) => {
+  return prisma.$transaction(async (tx) => {
+    const booking = await tx.booking.findUnique({
+      where: { id: bookingId },
+      include: { slot: true },
+    });
+
+    if (!booking) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found");
+    if (booking.studentId !== studentId)
+      throw new ApiError(httpStatus.FORBIDDEN, "You can only cancel your own bookings");
+    if (booking.status !== BookingStatus.PENDING)
+      throw new ApiError(httpStatus.BAD_REQUEST, "Only pending (unpaid) bookings can be cancelled");
+
+    const updated = await tx.booking.update({
+      where: { id: bookingId },
+      data: { status: BookingStatus.CANCELLED },
+    });
+
+    const slot = await tx.availabilitySlot.findUnique({
+      where: { id: booking.slotId },
+    });
+
+    if (slot) {
+      const newTotal = Math.max(0, (slot.totalBookings ?? 1) - 1);
+      await tx.availabilitySlot.update({
+        where: { id: booking.slotId },
+        data: {
+          totalBookings: newTotal,
+          isBooked: newTotal >= (slot.maxCapacity ?? MAX_CAPACITY),
+        },
+      });
+    }
+
+    return updated;
+  });
+};
+
 export const BookingService = {
   createBooking,
   getMyBookings,
   updateBookingStatusByTutor,
+  cancelBooking,
   getBookingById,
 };

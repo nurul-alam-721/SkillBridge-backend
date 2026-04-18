@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ReviewService } from "./review.service";
 import catchAsync from "../../helpers/catchAsync";
 import httpStatus from "http-status";
+import { UserRole } from "../../middlewares/auth";
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
   const studentId = req.user?.id!;
@@ -35,8 +36,33 @@ const getMyReviews = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateReview = catchAsync(async (req: Request, res: Response) => {
+  const studentId = req.user?.id!;
+  const { id: reviewId } = req.params;
+  const result = await ReviewService.updateReview(reviewId as string, studentId, req.body);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Review updated successfully",
+    data: result,
+  });
+});
+
+const deleteReview = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id!;
+  const userRole = req.user?.role as UserRole.STUDENT | UserRole.ADMIN;
+  const { id: reviewId } = req.params;
+  await ReviewService.deleteReview(reviewId as string, userId, userRole);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Review deleted successfully",
+    data: null,
+  });
+});
+
 export const ReviewController = {
   createReview,
   getTutorReviews,
   getMyReviews,
+  updateReview,
+  deleteReview,
 };
