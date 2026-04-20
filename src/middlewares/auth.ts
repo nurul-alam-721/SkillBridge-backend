@@ -3,11 +3,10 @@ import { auth as betterAuth } from '../lib/auth';
 import { fromNodeHeaders } from "better-auth/node";
 import { prisma } from "../lib/prisma";
 
-export enum UserRole {
-  STUDENT = "STUDENT",
-  TUTOR = "TUTOR",
-  ADMIN = "ADMIN",
-}
+
+import { UserRole } from "../types";
+export { UserRole };
+
 
 const auth = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -47,7 +46,7 @@ const auth = (...roles: UserRole[]) => {
         id: session.user.id,
         email: session.user.email,
         name: session.user.name,
-        role: session.user.role as string,
+        role: session.user.role as UserRole,
         emailVerified: session.user.emailVerified,
       };
 

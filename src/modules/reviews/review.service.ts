@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma";
-import { UserRole } from "../../middlewares/auth";
+import { UserRole } from "../../types";
+import { ReviewPayload } from "../../interfaces";
 import { ApiError } from "../../helpers/globalErrorHandler";
 import httpStatus from "http-status";
-import { ReviewPayload } from "./review.interface";
 
 const createReview = async (
   studentId: string,

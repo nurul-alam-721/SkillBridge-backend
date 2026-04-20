@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express, { Application } from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
@@ -15,11 +14,12 @@ import { bookingRoutes } from "./modules/bookings/booking.route";
 import { reviewRoutes } from "./modules/reviews/review.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
 import { paymentRoutes } from "./modules/payments/payment.route";
+import config from "./config";
 
 const app: Application = express();
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL!,
+  config.frontend_url!,
   "https://skill-bridge-client-green.vercel.app",
   "http://localhost:3000",
 ].filter(Boolean);
@@ -44,9 +44,6 @@ app.use(express.json());
 
 app.set("trust proxy", true);
 
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
 
 app.all("/api/auth/*path", toNodeHandler(auth));
 

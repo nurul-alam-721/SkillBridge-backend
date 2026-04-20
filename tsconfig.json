@@ -4,7 +4,7 @@
     "rootDir": "./src",
     "module": "commonjs",
     "target": "ES2023",
-    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "lib": ["esnext"],
     "sourceMap": true,
     "strict": true,

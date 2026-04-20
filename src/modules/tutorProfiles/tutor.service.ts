@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma";
-import { UserRole } from "../../middlewares/auth";
+import { UserRole } from "../../types";
+import { TutorProfileData, GetAllTutorsParams } from "../../interfaces";
 import { ApiError } from "../../helpers/globalErrorHandler";
 import { Prisma, UserStatus } from "@prisma/client";
-import { TutorProfileData, GetAllTutorsParams } from "./tutor.interface";
 
 const createTutorProfile = async (userId: string, data: TutorProfileData) => {
   if (!userId) throw new Error("User not logged in");

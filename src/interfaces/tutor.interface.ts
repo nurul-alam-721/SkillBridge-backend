@@ -1,4 +1,4 @@
-import { TutorSortableFields } from "../../types/types";
+import { TutorSortableFields } from "../types/tutor.types";
 
 export interface TutorProfileData {
   bio?: string;

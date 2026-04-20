@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
+import config from "../config";
 
 export class ApiError extends Error {
   statusCode: number;
@@ -49,7 +50,7 @@ const errorHandler = (
   // Generic errors
   else if (err instanceof Error) {
     message = err.message || message;
-    if (process.env.NODE_ENV !== "production") {
+    if (config.NODE_ENV !== "production") {
       error = err.stack;
     }
   }

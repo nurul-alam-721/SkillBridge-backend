@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../helpers/globalErrorHandler";
-import { CreateAvailabilitySlotPayload, UpdateAvailabilitySlotPayload } from "./availability.interface";
+import { CreateAvailabilitySlotPayload, UpdateAvailabilitySlotPayload } from "../../interfaces";
 
 const TIME_24H_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 

@@ -3,4 +3,3 @@ export interface CreateBookingPayload {
   slotId: string;
 }
 
-export type BookingUserRole = "STUDENT" | "TUTOR";

@@ -1,4 +1,4 @@
-import "dotenv/config";
+import config from "../config";
 import { prisma } from "../lib/prisma";
 import { UserRole } from "../middlewares/auth";
 
@@ -7,10 +7,10 @@ async function seedAdmin() {
   try {
 
     const adminData = {
-      name: process.env.ADMIN_NAME || "Admin",
-      email: process.env.ADMIN_EMAIL || "admin@admin.com",
+      name: config.admin_name!,
+      email: config.admin_email!,
       role: UserRole.ADMIN,
-      password: process.env.ADMIN_PASSWORD,
+      password: config.admin_password!,
     };
 
     const existingUser = await prisma.user.findUnique({
@@ -23,12 +23,12 @@ async function seedAdmin() {
 
 
     const signUpAdmin = await fetch(
-      `${process.env.SERVER_URL}/api/auth/sign-up/email`,
+      `${config.server_url}/api/auth/sign-up/email`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-           Origin: process.env.APP_URL || "http://localhost:3000",
+           Origin: config.app_url || "http://localhost:3000",
         },
         body: JSON.stringify(adminData),
       }

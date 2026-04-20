@@ -1,6 +1,7 @@
 import Stripe from "stripe";
+import config from "../../config";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const stripe = new Stripe(config.stripe_secret_key as string);
 
 const createStripePaymentIntent = async (amount: number, currency: string = "bdt") => {
   const paymentIntent = await stripe.paymentIntents.create({

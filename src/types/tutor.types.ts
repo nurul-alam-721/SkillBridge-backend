@@ -3,9 +3,3 @@ export type TutorSortableFields =
   | "hourlyRate"
   | "rating"
   | "experience";
-
-export type UserRole = {
-  STUDENT: string;
-  TUTOR: string;
-  ADMIN: string;
-};

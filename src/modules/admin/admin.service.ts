@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { UserStatus } from "./admin.interface";
+import { UserStatus } from "../../types";
 
 const getStats = async () => {
   const [

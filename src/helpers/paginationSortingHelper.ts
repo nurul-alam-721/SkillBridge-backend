@@ -1,12 +1,6 @@
 
 
-export type PaginationSortingResult = {
-  page: number;
-  limit: number;
-  skip: number;
-  sortBy: string;
-  sortOrder: "asc" | "desc";
-};
+import { PaginationSortingResult } from "../interfaces";
 
 export const paginationSortingHelper = (
   query: Record<string, unknown>

@@ -2,13 +2,14 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import z from "zod";
+import config from "../config";
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL!,
+  secret: config.better_auth_secret!,
+  baseURL: config.better_auth_url!,
   trustedOrigins: [
     "https://skill-bridge-client-green.vercel.app",
-    process.env.FRONTEND_URL!,
+    config.frontend_url!,
     "http://localhost:3000",
   ].filter(Boolean),
 
@@ -40,8 +41,8 @@ export const auth = betterAuth({
 
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: config.google_client_id!,
+      clientSecret: config.google_client_secret!,
       prompt: "select_account",
     },
   },
