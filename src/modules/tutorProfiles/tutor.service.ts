@@ -71,15 +71,13 @@ const getAllTutors = async (params: GetAllTutorsParams) => {
     throw new ApiError(400, "Limit must be a positive integer");
   }
 
-  const {
-    search,
-    categoryId,
-    availableDate,
-    sortBy,
-    sortOrder,
-  } = params;
+  const { search, categoryId, availableDate, sortBy, sortOrder } = params;
 
   const andConditions: Prisma.TutorProfileWhereInput[] = [];
+
+  andConditions.push({
+    user: { role: UserRole.TUTOR, status: UserStatus.ACTIVE },
+  });
 
   if (search) {
     andConditions.push({
@@ -116,8 +114,7 @@ const getAllTutors = async (params: GetAllTutorsParams) => {
   }
 
   const whereCondition: Prisma.TutorProfileWhereInput = {
-    ...(andConditions.length > 0 && { AND: andConditions }),
-    user: { role: UserRole.TUTOR, status: UserStatus.ACTIVE },
+    AND: andConditions,
   };
 
   const [tutors, totalTutors] = await Promise.all([
