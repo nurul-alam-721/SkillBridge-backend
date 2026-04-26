@@ -2,17 +2,19 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "Node16",
+    "module": "commonjs",
     "target": "ES2023",
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node"],
     "lib": ["esnext"],
     "sourceMap": true,
     "strict": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node16" 
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "generated"]
