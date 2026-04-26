@@ -34,7 +34,7 @@ const getStats = async () => {
         tutorProfile: {
           select: {
             hourlyRate: true,
-            user: { select: { name: true } },
+            user: { select: { name: true, image: true, email: true } },
             category: { select: { name: true } },
           },
         },
@@ -102,7 +102,7 @@ const getAllBookings = async (page = 1, limit = 20) => {
       },
       tutorProfile: {
         select: {
-          user: { select: { name: true, email: true } },
+          user: { select: { name: true, email: true, image: true } },
           category: { select: { name: true } },
           hourlyRate: true,
         },

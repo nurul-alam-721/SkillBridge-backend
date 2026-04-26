@@ -14,6 +14,7 @@ import { bookingRoutes } from "./modules/bookings/booking.route";
 import { reviewRoutes } from "./modules/reviews/review.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
 import { paymentRoutes } from "./modules/payments/payment.route";
+import { MetaRoutes } from "./modules/meta/meta.route";
 import config from "./config";
 
 const app: Application = express();
@@ -61,6 +62,7 @@ app.use("/api/availability-slots", AvailabilityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", AdminRoutes);
+app.use("/api/meta", MetaRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from SkillBridge!");

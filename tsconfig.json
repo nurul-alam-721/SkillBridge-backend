@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "commonjs",
+    "module": "Node16",
     "target": "ES2023",
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "lib": ["esnext"],
@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node16" 
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "generated"]
